@@ -626,7 +626,7 @@ async function loadDashboard() {
 }
 
 function emailRow(e) {
-  return `<tr>
+  return `<tr class="email-row" onclick="showDetails('${e.id}')">
     <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
       ${e.subject || '<span style="color:var(--muted)">(no subject)</span>'}
     </td>
@@ -755,9 +755,10 @@ function emailRow(e) {
         <td><span class="badge b-${e.status}">${e.status}</span></td>
         <td>${e.open_count}</td>
         <td>${e.click_count}</td>
-        <td style="color:var(--muted)">${fmtDate(e.sent_at)}</td>
-        <td><button class="btn btn-ghost" style="padding:4px 10px;font-size:12px"
-          onclick="deleteEmail('${e.id}')">Delete</button></td>`;
+        <td><button class="btn btn-ghost" style="padding:4px 10px;font-size:12px;margin-right:4px"
+          onclick="event.stopPropagation(); showDetails('${e.id}')">Details</button>
+        <button class="btn btn-ghost" style="padding:4px 10px;font-size:12px;color:var(--red)"
+          onclick="event.stopPropagation(); deleteEmail('${e.id}')">Delete</button></td>`;
         return row.outerHTML;
       }).join('')
     : '<tr><td colspan="7" class="empty">No emails yet</td></tr>';
@@ -861,7 +862,8 @@ async function login() {
   }).then(r=>r.json()).catch(()=>null);
   if (r?.token) {
     token = r.token; localStorage.setItem('mt_token', token);
-    closeModal('login-modal');
+    document.getElementById('login-page').style.display = 'none';
+    document.getElementById('app-container').style.display = 'block';
     document.getElementById('sidebar-user').textContent = r.user.email;
     loadDashboard(); loadSettings(); connectSSE();
   } else { err.textContent = r?.error || 'Login failed'; }
@@ -878,7 +880,8 @@ async function register() {
   }).then(r=>r.json()).catch(()=>null);
   if (r?.token) {
     token = r.token; localStorage.setItem('mt_token', token);
-    closeModal('login-modal');
+    document.getElementById('login-page').style.display = 'none';
+    document.getElementById('app-container').style.display = 'block';
     loadDashboard(); loadSettings(); connectSSE();
   } else { err.textContent = r?.error || 'Registration failed'; }
 }
