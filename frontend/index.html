@@ -534,7 +534,7 @@
         </div>
 
         <div class="modal-footer" style="margin-top:24px;border-top:1px solid var(--border);padding-top:20px">
-          <button class="btn btn-ghost" onclick="generatePDF()">Generate Certificate (PDF)</button>
+          <button id="pdf-btn" class="btn btn-ghost" onclick="generatePDF()">Generate Certificate (PDF)</button>
         </div>
       </div>
     </div>
@@ -697,7 +697,7 @@ function emailRow(e) {
 
   async function generatePDF() {
     try {
-      const btn = document.querySelector('.modal-footer .btn-ghost');
+      const btn = document.getElementById('pdf-btn');
       const originalText = btn.textContent;
       btn.textContent = 'Generating...';
       btn.disabled = true;
@@ -706,18 +706,29 @@ function emailRow(e) {
       document.getElementById('cert-header').style.display = 'block';
       
       const content = document.getElementById('cert-content');
+      const history = document.getElementById('det-history');
+      
+      // Temporarily expand history for full capture
+      const origMaxH = history.style.maxHeight;
+      const origOverflow = history.style.overflowY;
+      history.style.maxHeight = 'none';
+      history.style.overflowY = 'visible';
       
       const canvas = await html2canvas(content, {
         scale: 2,
         backgroundColor: document.documentElement.getAttribute('data-theme') === 'light' ? '#fff' : '#0f1117'
       });
       
-      // Hide certificate header again
+      // Restore styles
+      history.style.maxHeight = origMaxH;
+      history.style.overflowY = origOverflow;
       document.getElementById('cert-header').style.display = 'none';
 
       const imgData = canvas.toDataURL('image/png');
-      const { jsPDF } = window.jspdf;
+      const jsPDF = window.jspdf ? window.jspdf.jsPDF : window.jsPDF;
       
+      if (!jsPDF) throw new Error('jsPDF library not loaded');
+
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'px',
@@ -734,7 +745,12 @@ function emailRow(e) {
       btn.disabled = false;
     } catch (e) {
       console.error('PDF Generation failed', e);
-      alert('Failed to generate PDF. Check console.');
+      alert('Failed to generate PDF: ' + e.message);
+      const btn = document.getElementById('pdf-btn');
+      if (btn) {
+        btn.textContent = 'Generate Certificate (PDF)';
+        btn.disabled = false;
+      }
     }
   }
 
