@@ -6,8 +6,8 @@ const logger       = require('../utils/logger');
 
 const BASE = process.env.TRACKING_BASE_URL || 'http://localhost:3001';
 
-async function createTrackedEmail(userId, { subject, recipientEmail, gmailMessageId, gmailThreadId }) {
-  const id = uuid();
+async function createTrackedEmail(userId, { id: providedId, subject, recipientEmail, gmailMessageId, gmailThreadId }) {
+  const id = providedId || uuid();
   await pool.query(
     `INSERT INTO tracked_emails (id,user_id,gmail_message_id,gmail_thread_id,subject,recipient_email)
      VALUES ($1,$2,$3,$4,$5,$6)`,

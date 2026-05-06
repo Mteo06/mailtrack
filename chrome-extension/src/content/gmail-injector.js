@@ -50,20 +50,30 @@
       const to = compose.querySelector('input[name="to"]')?.value || '';
 
       if (body) {
-        // Request tracking pixel from server
+        const id = generateUUID();
+        const baseUrl = 'https://mailtrack-lmba.onrender.com';
+        const pixelHtml = `<img src="${baseUrl}/track/open/${id}" width="1" height="1" style="display:none" alt=""/>`;
+
+        // Instant injection
+        body.innerHTML += `\n${pixelHtml}`;
+        console.log('MailTrack: Instant tracking pixel injected:', id);
+
+        // Notify server in the background
         chrome.runtime.sendMessage({
           type: 'CREATE_TRACKED_EMAIL',
-          data: { subject, recipientEmail: to }
-        }, (res) => {
-          if (res && res.trackingPixelHtml) {
-            body.innerHTML += `\n${res.trackingPixelHtml}`;
-            console.log('MailTrack: Tracking pixel injected.');
-          }
+          data: { id, subject, recipientEmail: to }
         });
       }
     });
 
     sendBtn.parentElement?.insertBefore(btn, sendBtn);
+  }
+
+  function generateUUID() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+      const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
   }
 
   // Live notification banner from background
