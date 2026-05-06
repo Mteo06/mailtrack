@@ -2,7 +2,7 @@
  * MailTrack — Background Service Worker (MV3)
  * Handles: SSE real-time connection, browser notifications, API relay
  */
-const API_BASE = 'http://localhost:3001';
+const API_BASE = 'https://mailtrack-lmba.onrender.com';
 
 let authToken = null;
 let reconnectTimer = null;

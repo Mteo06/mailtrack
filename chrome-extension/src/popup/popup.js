@@ -1,4 +1,4 @@
-const API    = 'http://localhost:3001';
+const API    = 'https://mailtrack-lmba.onrender.com';
 let token    = null;
 const events = [];
 

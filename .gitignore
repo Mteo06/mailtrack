@@ -19,7 +19,7 @@ yarn-error.log*
 Thumbs.db
 
 # Firebase keys
-*.json
+mailtrack-*.json
 
 # Chrome Extension build files (if any)
 dist/

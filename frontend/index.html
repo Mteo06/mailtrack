@@ -371,14 +371,14 @@
     <div id="login-err" style="font-size:13px;color:var(--red);margin-bottom:10px;min-height:16px"></div>
     <button class="btn btn-primary" style="width:100%;margin-bottom:10px" onclick="login()">Sign In</button>
     <button class="btn btn-ghost" style="width:100%;margin-bottom:16px" onclick="register()">Create Account</button>
-    <a href="http://localhost:3001/auth/google" style="display:block;font-size:13px;color:var(--accent)">
+    <a href="https://mailtrack-lmba.onrender.com/auth/google" style="display:block;font-size:13px;color:var(--accent)">
       Sign in with Google →
     </a>
   </div>
 </div>
 
 <script>
-const API = 'http://localhost:3001';
+const API = 'https://mailtrack-lmba.onrender.com';
 let token = localStorage.getItem('mt_token')
   || new URLSearchParams(location.search).get('token');
 if (token) localStorage.setItem('mt_token', token);
