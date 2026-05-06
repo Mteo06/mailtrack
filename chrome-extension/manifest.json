@@ -1,0 +1,33 @@
+{
+  "manifest_version": 3,
+  "name": "MailTrack — Email Tracking for Gmail",
+  "version": "1.0.0",
+  "description": "GDPR-compliant email tracking. Tracking is off by default — you choose when to enable it.",
+  "permissions": ["storage", "notifications", "identity"],
+  "host_permissions": ["https://mail.google.com/*"],
+  "background": {
+    "service_worker": "src/background/service-worker.js",
+    "type": "module"
+  },
+  "content_scripts": [{
+    "matches": ["https://mail.google.com/*"],
+    "js": ["src/content/gmail-injector.js"],
+    "css": ["src/content/gmail-styles.css"],
+    "run_at": "document_idle"
+  }],
+  "action": {
+    "default_popup": "src/popup/popup.html",
+    "default_title": "MailTrack"
+  },
+  "oauth2": {
+    "client_id": "389685156386-7cq1nbp4vkadq9mct05sbmib3q1vu7h9.apps.googleusercontent.com",
+    "scopes": ["https://www.googleapis.com/auth/gmail.compose"]
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  },
+  "web_accessible_resources": [{
+    "resources": ["src/content/gmail-styles.css"],
+    "matches": ["https://mail.google.com/*"]
+  }]
+}
