@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MailTrack Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root,[data-theme="dark"]{
+      --bg:#0f1117;--surface:#1a1d27;--surface2:#21263a;
+      --border:#2e3347;--text:#e2e8f0;--muted:#7c8db5;
+      --accent:#4f8ef7;--green:#34d399;--red:#f87171;--yellow:#fbbf24;
+      --radius:10px;--font:'Inter',sans-serif;
+    }
+    [data-theme="light"]{
+      --bg:#f1f5f9;--surface:#fff;--surface2:#f8fafc;
+      --border:#e2e8f0;--text:#0f172a;--muted:#64748b;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100dvh}
+    .sidebar{position:fixed;top:0;left:0;width:220px;height:100vh;background:var(--surface);
+      border-right:1px solid var(--border);display:flex;flex-direction:column;padding:20px 0;z-index:100}
+    .logo{display:flex;align-items:center;gap:8px;padding:0 20px 24px;font-weight:700;font-size:18px}
+    .logo-icon{width:28px;height:28px;background:var(--accent);border-radius:8px;
+      display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px}
+    nav a{display:flex;align-items:center;gap:10px;padding:10px 20px;color:var(--muted);
+      text-decoration:none;font-size:14px;font-weight:500;transition:color .15s,background .15s}
+    nav a:hover,nav a.active{color:var(--text);background:var(--surface2)}
+    nav a.active{color:var(--accent)}
+    .sidebar-footer{margin-top:auto;padding:16px 20px;font-size:12px;color:var(--muted);border-top:1px solid var(--border)}
+    .main{margin-left:220px;padding:32px;min-height:100vh}
+    .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px}
+    .topbar h1{font-size:22px;font-weight:700}
+    .topbar-right{display:flex;align-items:center;gap:10px}
+    .btn{padding:8px 16px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;border:none;transition:opacity .15s}
+    .btn-primary{background:var(--accent);color:#fff}
+    .btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border)}
+    .btn:hover{opacity:.85}
+    .icon-btn{background:none;border:1px solid var(--border);border-radius:8px;
+      color:var(--muted);padding:7px 10px;cursor:pointer;font-size:14px;line-height:1}
+    .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+    .kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px}
+    .kpi-value{font-size:32px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+    .kpi-label{font-size:13px;color:var(--muted);margin-top:4px}
+    .kpi-sub{font-size:12px;margin-top:6px;color:var(--muted)}
+    .kpi-sub.up{color:var(--green)} .kpi-sub.dn{color:var(--red)}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+    .card-header{display:flex;align-items:center;justify-content:space-between;
+      padding:14px 18px;border-bottom:1px solid var(--border)}
+    .card-title{font-size:14px;font-weight:600}
+    table{width:100%;border-collapse:collapse}
+    th{padding:10px 14px;font-size:11px;font-weight:600;color:var(--muted);
+      text-transform:uppercase;letter-spacing:.05em;text-align:left;border-bottom:1px solid var(--border)}
+    td{padding:12px 14px;font-size:13px;border-bottom:1px solid var(--border);vertical-align:middle}
+    tr:last-child td{border-bottom:none}
+    tr:hover td{background:var(--surface2)}
+    .badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600}
+    .b-sent{background:rgba(124,141,181,.15);color:var(--muted)}
+    .b-opened{background:rgba(79,142,247,.15);color:var(--accent)}
+    .b-clicked{background:rgba(52,211,153,.15);color:var(--green)}
+    .live-dot{width:8px;height:8px;border-radius:50%;background:var(--green);
+      animation:pulse 2s ease infinite;display:inline-block;flex-shrink:0}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+    .feed{max-height:340px;overflow-y:auto}
+    .feed-item{display:flex;align-items:flex-start;gap:12px;padding:10px 18px;
+      border-bottom:1px solid var(--border);font-size:13px;animation:fadeIn .3s ease}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+    .feed-item:last-child{border-bottom:none}
+    .feed-icon{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;
+      justify-content:center;font-size:14px;flex-shrink:0;margin-top:1px}
+    .fi-open{background:rgba(79,142,247,.15)} .fi-click{background:rgba(52,211,153,.15)}
+    .feed-type{font-weight:500}
+    .feed-detail{color:var(--muted);font-size:12px;margin-top:2px}
+    .feed-time{color:var(--muted);font-size:11px;margin-left:auto;white-space:nowrap;padding-left:8px}
+    .empty{padding:36px;text-align:center;color:var(--muted);font-size:13px}
+
+    /* Modal */
+    .overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;
+      display:none;align-items:center;justify-content:center}
+    .overlay.open{display:flex}
+    .modal{background:var(--surface);border:1px solid var(--border);border-radius:14px;
+      padding:28px;width:480px;max-width:95vw;max-height:90vh;overflow-y:auto}
+    .modal h2{font-size:18px;font-weight:700;margin-bottom:20px}
+    .field{margin-bottom:16px}
+    .field label{display:block;font-size:13px;font-weight:500;margin-bottom:6px;color:var(--muted)}
+    .field input,.field textarea,.field select{width:100%;padding:10px 12px;background:var(--surface2);
+      border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;
+      font-family:var(--font);outline:none;transition:border-color .15s}
+    .field input:focus,.field textarea:focus{border-color:var(--accent)}
+    .field textarea{min-height:120px;resize:vertical}
+    .toggle-row{display:flex;align-items:center;justify-content:space-between;
+      padding:10px 0;border-bottom:1px solid var(--border)}
+    .toggle-row:last-of-type{border-bottom:none}
+    .toggle-label{font-size:13px;font-weight:500}
+    .toggle-sub{font-size:11px;color:var(--muted);margin-top:2px}
+    .toggle{position:relative;width:38px;height:21px;flex-shrink:0}
+    .toggle input{opacity:0;width:0;height:0}
+    .slider{position:absolute;inset:0;background:var(--border);border-radius:21px;cursor:pointer;transition:background .2s}
+    .slider::before{content:'';position:absolute;width:15px;height:15px;left:3px;bottom:3px;
+      background:#fff;border-radius:50%;transition:transform .2s}
+    input:checked+.slider{background:var(--accent)}
+    input:checked+.slider::before{transform:translateX(17px)}
+    .modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:20px}
+    .conn-ok{color:var(--green)} .conn-err{color:var(--red)} .conn-wait{color:var(--yellow)}
+
+    /* Settings page */
+    .page{display:none} .page.active{display:block}
+    .settings-section{background:var(--surface);border:1px solid var(--border);
+      border-radius:var(--radius);padding:20px;margin-bottom:16px}
+    .settings-section h3{font-size:14px;font-weight:600;margin-bottom:16px;padding-bottom:12px;
+      border-bottom:1px solid var(--border)}
+    .danger-zone{border-color:rgba(248,113,113,.3)}
+    .danger-zone h3{color:var(--red)}
+    .btn-danger{background:var(--red);color:#fff}
+
+    @media(max-width:900px){
+      .sidebar{display:none}.main{margin-left:0;padding:16px}
+      .kpis{grid-template-columns:1fr 1fr}.grid2{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-icon">✉</div>
+    MailTrack
+  </div>
+  <nav id="sidebar-nav">
+    <a href="#" data-page="dashboard" class="active">📊 Dashboard</a>
+    <a href="#" data-page="emails">📨 Emails</a>
+    <a href="#" data-page="settings">⚙️ Settings</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div id="conn-status" class="conn-wait">● Connecting…</div>
+    <div style="margin-top:6px" id="sidebar-user"></div>
+  </div>
+</aside>
+
+<!-- Main -->
+<main class="main">
+
+  <!-- Dashboard Page -->
+  <div class="page active" id="page-dashboard">
+    <div class="topbar">
+      <h1>Dashboard</h1>
+      <div class="topbar-right">
+        <span class="live-dot"></span>
+        <span style="font-size:13px;color:var(--muted)">Live</span>
+        <button class="icon-btn" onclick="toggleTheme()" id="theme-btn">🌙</button>
+        <button class="btn btn-primary" onclick="openComposeModal()">+ Send Email</button>
+      </div>
+    </div>
+
+    <div class="kpis">
+      <div class="kpi">
+        <div class="kpi-value" id="kpi-sent">—</div>
+        <div class="kpi-label">Emails Tracked</div>
+        <div class="kpi-sub" id="kpi-sent-sub">—</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-value" id="kpi-opens">—</div>
+        <div class="kpi-label">Total Opens</div>
+        <div class="kpi-sub" id="kpi-open-rate">—% open rate</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-value" id="kpi-clicks">—</div>
+        <div class="kpi-label">Link Clicks</div>
+        <div class="kpi-sub">across all emails</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-value" id="kpi-live">0</div>
+        <div class="kpi-label">Live Events</div>
+        <div class="kpi-sub up" id="kpi-live-sub">waiting…</div>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Recent Emails</span>
+          <button class="btn btn-ghost" style="font-size:12px;padding:5px 10px"
+            onclick="navigate('emails')">View all</button>
+        </div>
+        <table>
+          <thead><tr>
+            <th>Subject</th><th>To</th><th>Status</th><th>Opens</th><th>Clicks</th>
+          </tr></thead>
+          <tbody id="email-tbody"><tr><td colspan="5" class="empty">Loading…</td></tr></tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Live Activity</span>
+          <span class="live-dot"></span>
+        </div>
+        <div class="feed" id="event-feed">
+          <div class="empty">Waiting for opens &amp; clicks…</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Emails Page -->
+  <div class="page" id="page-emails">
+    <div class="topbar">
+      <h1>Emails</h1>
+      <button class="btn btn-primary" onclick="openComposeModal()">+ Send Email</button>
+    </div>
+    <div class="card">
+      <table>
+        <thead><tr>
+          <th>Subject</th><th>Recipient</th><th>Status</th>
+          <th>Opens</th><th>Clicks</th><th>Sent</th><th></th>
+        </tr></thead>
+        <tbody id="all-email-tbody"><tr><td colspan="7" class="empty">Loading…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Settings Page -->
+  <div class="page" id="page-settings">
+    <div class="topbar"><h1>Settings</h1></div>
+
+    <div class="settings-section">
+      <h3>Tracking Preferences</h3>
+      <div class="toggle-row">
+        <div>
+          <div class="toggle-label">Enable Tracking</div>
+          <div class="toggle-sub">Must be explicitly enabled (GDPR opt-in)</div>
+        </div>
+        <label class="toggle"><input type="checkbox" id="s-tracking"><span class="slider"></span></label>
+      </div>
+      <div class="toggle-row">
+        <div>
+          <div class="toggle-label">IP Anonymization</div>
+          <div class="toggle-sub">Mask last IP octet — recommended (on by default)</div>
+        </div>
+        <label class="toggle"><input type="checkbox" id="s-anon" checked><span class="slider"></span></label>
+      </div>
+      <div class="toggle-row">
+        <div>
+          <div class="toggle-label">Open Notifications</div>
+          <div class="toggle-sub">Real-time alerts when email is opened</div>
+        </div>
+        <label class="toggle"><input type="checkbox" id="s-notify-open" checked><span class="slider"></span></label>
+      </div>
+      <div class="toggle-row">
+        <div>
+          <div class="toggle-label">Click Notifications</div>
+          <div class="toggle-sub">Real-time alerts when a link is clicked</div>
+        </div>
+        <label class="toggle"><input type="checkbox" id="s-notify-click" checked><span class="slider"></span></label>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <h3>Gmail Integration</h3>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:12px">
+        Connect your Google account to send tracked emails directly from this dashboard.
+      </p>
+      <div id="gmail-status" style="margin-bottom:12px;font-size:13px"></div>
+      <button class="btn btn-primary" onclick="location.href='http://localhost:3001/auth/google'">
+        Connect Google Account
+      </button>
+    </div>
+
+    <div class="settings-section">
+      <h3>Webhook Integration</h3>
+      <div class="field">
+        <label>Webhook URL</label>
+        <input type="url" id="s-webhook" placeholder="https://your-server.com/webhook">
+      </div>
+      <div class="field">
+        <label>Slack Webhook URL (optional)</label>
+        <input type="url" id="s-slack" placeholder="https://hooks.slack.com/services/…">
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <h3>Data Retention</h3>
+      <div class="field">
+        <label>Keep tracking data for (days)</label>
+        <select id="s-retention">
+          <option value="30">30 days</option>
+          <option value="90">90 days</option>
+          <option value="180">180 days</option>
+          <option value="365" selected>365 days (default)</option>
+          <option value="730">2 years</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="margin-bottom:16px">
+      <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
+    </div>
+
+    <div class="settings-section danger-zone">
+      <h3>GDPR Rights</h3>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn btn-ghost" onclick="exportData()">⬇ Export My Data</button>
+        <button class="btn btn-danger" onclick="deleteAccount()">🗑 Delete Account &amp; All Data</button>
+      </div>
+      <p style="font-size:12px;color:var(--muted);margin-top:12px">
+        Exporting downloads all personal data we hold. Deletion is permanent and irreversible.
+      </p>
+    </div>
+  </div>
+
+</main>
+
+<!-- Compose Modal -->
+<div class="overlay" id="compose-modal">
+  <div class="modal">
+    <h2>Send Tracked Email</h2>
+    <div class="field">
+      <label>To</label>
+      <input type="email" id="c-to" placeholder="recipient@example.com">
+    </div>
+    <div class="field">
+      <label>Subject</label>
+      <input type="text" id="c-subject" placeholder="Email subject">
+    </div>
+    <div class="field">
+      <label>Body (HTML)</label>
+      <textarea id="c-body" placeholder="<p>Hello,</p><p>Your message here…</p>"></textarea>
+    </div>
+    <div class="toggle-row" style="padding:10px 0">
+      <div>
+        <div class="toggle-label">Track Opens</div>
+        <div class="toggle-sub">Inject 1×1 pixel on send</div>
+      </div>
+      <label class="toggle"><input type="checkbox" id="c-track" checked><span class="slider"></span></label>
+    </div>
+    <div class="toggle-row" style="padding:10px 0">
+      <div>
+        <div class="toggle-label">Track Link Clicks</div>
+        <div class="toggle-sub">Rewrite links with redirect proxy</div>
+      </div>
+      <label class="toggle"><input type="checkbox" id="c-links" checked><span class="slider"></span></label>
+    </div>
+    <div id="compose-msg" style="font-size:13px;color:var(--muted);margin-top:8px;min-height:18px"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('compose-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="sendEmail()">Send Email</button>
+    </div>
+  </div>
+</div>
+
+<!-- Login Modal -->
+<div class="overlay open" id="login-modal">
+  <div class="modal" style="max-width:400px;text-align:center">
+    <div style="font-size:40px;margin-bottom:12px">✉️</div>
+    <h2 style="margin-bottom:8px">Welcome to MailTrack</h2>
+    <p style="color:var(--muted);font-size:13px;margin-bottom:24px;line-height:1.6">
+      GDPR-compliant email tracking for Gmail.<br>
+      Tracking is always opt-in. Your email content is never stored.
+    </p>
+    <div class="field">
+      <label>Email</label>
+      <input type="email" id="l-email" placeholder="you@example.com">
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="l-pass" placeholder="••••••••">
+    </div>
+    <div id="login-err" style="font-size:13px;color:var(--red);margin-bottom:10px;min-height:16px"></div>
+    <button class="btn btn-primary" style="width:100%;margin-bottom:10px" onclick="login()">Sign In</button>
+    <button class="btn btn-ghost" style="width:100%;margin-bottom:16px" onclick="register()">Create Account</button>
+    <a href="http://localhost:3001/auth/google" style="display:block;font-size:13px;color:var(--accent)">
+      Sign in with Google →
+    </a>
+  </div>
+</div>
+
+<script>
+const API = 'http://localhost:3001';
+let token = localStorage.getItem('mt_token')
+  || new URLSearchParams(location.search).get('token');
+if (token) localStorage.setItem('mt_token', token);
+let liveCount = 0;
+const liveEvents = [];
+let settings = {};
+
+// ── Init ──────────────────────────────────────────────────────────────────
+(async function init() {
+  if (!token) return; // show login modal
+  closeModal('login-modal');
+  const r = await apiFetch('/auth/me');
+  if (!r) return;
+  document.getElementById('sidebar-user').textContent = r.user.email;
+  loadDashboard();
+  loadSettings();
+  connectSSE();
+})();
+
+// ── Navigation ────────────────────────────────────────────────────────────
+document.getElementById('sidebar-nav').addEventListener('click', (e) => {
+  const a = e.target.closest('a[data-page]');
+  if (!a) return;
+  e.preventDefault();
+  navigate(a.dataset.page);
+});
+
+function navigate(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+  document.getElementById(`page-${page}`)?.classList.add('active');
+  document.querySelector(`[data-page="${page}"]`)?.classList.add('active');
+  if (page === 'emails') loadAllEmails();
+  if (page === 'settings') loadSettings();
+}
+
+// ── Dashboard ─────────────────────────────────────────────────────────────
+async function loadDashboard() {
+  const data = await apiFetch('/email/list?limit=10');
+  if (!data) return;
+  const { emails, total } = data;
+  const opens  = emails.reduce((s,e) => s + e.open_count,  0);
+  const clicks = emails.reduce((s,e) => s + e.click_count, 0);
+  const opened = emails.filter(e => e.status !== 'sent').length;
+
+  document.getElementById('kpi-sent').textContent   = total;
+  document.getElementById('kpi-opens').textContent  = opens;
+  document.getElementById('kpi-clicks').textContent = clicks;
+  document.getElementById('kpi-open-rate').textContent =
+    total ? `${Math.round(opened/total*100)}% open rate` : '—% open rate';
+
+  document.getElementById('email-tbody').innerHTML = emails.length
+    ? emails.slice(0,8).map(emailRow).join('')
+    : '<tr><td colspan="5" class="empty">No emails yet</td></tr>';
+}
+
+function emailRow(e) {
+  return `<tr>
+    <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
+      ${e.subject || '<span style="color:var(--muted)">(no subject)</span>'}
+    </td>
+    <td style="color:var(--muted)">${e.recipient_email || '—'}</td>
+    <td><span class="badge b-${e.status}">${e.status}</span></td>
+    <td>${e.open_count}</td>
+    <td>${e.click_count}</td>
+  </tr>`;
+}
+
+// ── All Emails ────────────────────────────────────────────────────────────
+async function loadAllEmails() {
+  const data = await apiFetch('/email/list?limit=50');
+  if (!data) return;
+  document.getElementById('all-email-tbody').innerHTML = data.emails.length
+    ? data.emails.map(e => `<tr>
+        <td>${e.subject || '<span style="color:var(--muted)">(no subject)</span>'}</td>
+        <td style="color:var(--muted)">${e.recipient_email || '—'}</td>
+        <td><span class="badge b-${e.status}">${e.status}</span></td>
+        <td>${e.open_count}</td>
+        <td>${e.click_count}</td>
+        <td style="color:var(--muted)">${fmtDate(e.sent_at)}</td>
+        <td><button class="btn btn-ghost" style="padding:4px 10px;font-size:12px"
+          onclick="deleteEmail('${e.id}')">Delete</button></td>
+      </tr>`).join('')
+    : '<tr><td colspan="7" class="empty">No emails yet</td></tr>';
+}
+
+async function deleteEmail(id) {
+  if (!confirm('Delete this tracked email and all its events?')) return;
+  await apiFetch(`/email/${id}`, { method: 'DELETE' });
+  loadAllEmails();
+  loadDashboard();
+}
+
+// ── Settings ──────────────────────────────────────────────────────────────
+async function loadSettings() {
+  const s = await apiFetch('/user/settings');
+  if (!s) return;
+  settings = s;
+  document.getElementById('s-tracking').checked      = s.tracking_enabled ?? false;
+  document.getElementById('s-anon').checked           = s.ip_anonymization ?? true;
+  document.getElementById('s-notify-open').checked   = s.notify_on_open   ?? true;
+  document.getElementById('s-notify-click').checked  = s.notify_on_click  ?? true;
+  document.getElementById('s-webhook').value         = s.webhook_url        || '';
+  document.getElementById('s-slack').value           = s.slack_webhook_url  || '';
+  document.getElementById('s-retention').value       = String(s.data_retention_days || 365);
+  const gst = document.getElementById('gmail-status');
+  if (s.gmail_connected) {
+    gst.style.color = 'var(--green)';
+    gst.textContent = '✓ Gmail connected';
+  } else {
+    gst.style.color = 'var(--red)';
+    gst.textContent = '✗ Gmail not connected';
+  }
+}
+
+async function saveSettings() {
+  const payload = {
+    tracking_enabled:    document.getElementById('s-tracking').checked,
+    ip_anonymization:    document.getElementById('s-anon').checked,
+    notify_on_open:      document.getElementById('s-notify-open').checked,
+    notify_on_click:     document.getElementById('s-notify-click').checked,
+    webhook_url:         document.getElementById('s-webhook').value || null,
+    slack_webhook_url:   document.getElementById('s-slack').value  || null,
+    data_retention_days: parseInt(document.getElementById('s-retention').value, 10),
+  };
+  const r = await apiFetch('/user/settings', { method:'POST', body: payload });
+  if (r?.success) alert('Settings saved!');
+}
+
+// ── GDPR ──────────────────────────────────────────────────────────────────
+async function exportData() {
+  const r = await apiFetch('/user/settings/gdpr/export');
+  if (!r) return;
+  const blob = new Blob([JSON.stringify(r, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `mailtrack-export-${Date.now()}.json`;
+  a.click();
+}
+
+async function deleteAccount() {
+  if (!confirm('This will permanently delete your account and ALL tracking data. Continue?')) return;
+  if (!confirm('This action CANNOT be undone. Are you sure?')) return;
+  const r = await apiFetch('/user/settings/gdpr/delete', { method: 'DELETE' });
+  if (r?.success) { localStorage.removeItem('mt_token'); location.reload(); }
+}
+
+// ── Compose / Send ────────────────────────────────────────────────────────
+function openComposeModal() { document.getElementById('compose-modal').classList.add('open'); }
+
+async function sendEmail() {
+  const msg = document.getElementById('compose-msg');
+  msg.textContent = 'Sending…';
+  const payload = {
+    to:             document.getElementById('c-to').value,
+    subject:        document.getElementById('c-subject').value,
+    body:           document.getElementById('c-body').value,
+    enableTracking: document.getElementById('c-track').checked,
+    trackLinks:     document.getElementById('c-links').checked,
+  };
+  if (!payload.to || !payload.subject) { msg.textContent = 'To and Subject are required.'; return; }
+  const r = await apiFetch('/email/send', { method:'POST', body: payload });
+  if (r?.gmailMessageId) {
+    msg.style.color = 'var(--green)';
+    msg.textContent = '✓ Sent! Gmail message ID: ' + r.gmailMessageId;
+    setTimeout(() => { closeModal('compose-modal'); loadDashboard(); }, 2000);
+  } else {
+    msg.style.color = 'var(--red)';
+    msg.textContent = 'Send failed — check Gmail connection in settings.';
+  }
+}
+
+// ── Auth ──────────────────────────────────────────────────────────────────
+async function login() {
+  const err  = document.getElementById('login-err');
+  const email = document.getElementById('l-email').value;
+  const pass  = document.getElementById('l-pass').value;
+  err.textContent = '';
+  const r = await fetch(`${API}/auth/login`, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ email, password: pass }),
+  }).then(r=>r.json()).catch(()=>null);
+  if (r?.token) {
+    token = r.token; localStorage.setItem('mt_token', token);
+    closeModal('login-modal');
+    document.getElementById('sidebar-user').textContent = r.user.email;
+    loadDashboard(); loadSettings(); connectSSE();
+  } else { err.textContent = r?.error || 'Login failed'; }
+}
+
+async function register() {
+  const err   = document.getElementById('login-err');
+  const email = document.getElementById('l-email').value;
+  const pass  = document.getElementById('l-pass').value;
+  err.textContent = '';
+  const r = await fetch(`${API}/auth/register`, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ email, password: pass }),
+  }).then(r=>r.json()).catch(()=>null);
+  if (r?.token) {
+    token = r.token; localStorage.setItem('mt_token', token);
+    closeModal('login-modal');
+    loadDashboard(); loadSettings(); connectSSE();
+  } else { err.textContent = r?.error || 'Registration failed'; }
+}
+
+// ── SSE real-time ─────────────────────────────────────────────────────────
+function connectSSE() {
+  if (!token) return;
+  const el = document.getElementById('conn-status');
+
+  const evtSource = new EventSource(`${API}/notifications/stream?token=${token}`);
+  // Note: EventSource doesn't support headers; pass token as query param
+  // In production, use a short-lived signed SSE token instead
+
+  evtSource.onopen = () => {
+    el.className = 'conn-ok'; el.textContent = '● Connected';
+  };
+  evtSource.onerror = () => {
+    el.className = 'conn-err'; el.textContent = '● Reconnecting…';
+  };
+  evtSource.onmessage = (e) => {
+    try { handleLiveEvent(JSON.parse(e.data)); } catch {}
+  };
+}
+
+function handleLiveEvent(event) {
+  liveCount++;
+  document.getElementById('kpi-live').textContent = liveCount;
+
+  const isOpen = event.type === 'email.opened';
+  document.getElementById('kpi-live-sub').textContent =
+    `Last: ${isOpen ? '👁 open' : '🔗 click'} ${ago(new Date(event.occurred_at))}`;
+
+  liveEvents.unshift(event);
+  if (liveEvents.length > 30) liveEvents.pop();
+  renderFeed();
+}
+
+function renderFeed() {
+  const feed = document.getElementById('event-feed');
+  if (!liveEvents.length) {
+    feed.innerHTML = '<div class="empty">Waiting for opens &amp; clicks…</div>'; return;
+  }
+  feed.innerHTML = liveEvents.map((e) => {
+    const isOpen = e.type === 'email.opened';
+    return `<div class="feed-item">
+      <div class="feed-icon ${isOpen ? 'fi-open' : 'fi-click'}">${isOpen ? '👁' : '🔗'}</div>
+      <div class="feed-meta">
+        <div class="feed-type">${isOpen ? 'Email Opened' : 'Link Clicked'}</div>
+        <div class="feed-detail">
+          ${e.country ? e.country + ' · ' : ''}${e.device_type || ''}${e.browser ? ' · ' + e.browser : ''}
+        </div>
+      </div>
+      <div class="feed-time">${ago(new Date(e.occurred_at))}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────
+async function apiFetch(path, options = {}) {
+  if (!token) return null;
+  try {
+    const r = await fetch(`${API}${path}`, {
+      method: options.method || 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        ...(options.body ? { 'Content-Type': 'application/json' } : {}),
+      },
+      body: options.body ? JSON.stringify(options.body) : undefined,
+    });
+    if (r.status === 401) { localStorage.removeItem('mt_token'); location.reload(); return null; }
+    return r.json();
+  } catch { return null; }
+}
+
+function closeModal(id) { document.getElementById(id)?.classList.remove('open'); }
+
+function toggleTheme() {
+  const html = document.documentElement;
+  const next = html.dataset.theme === 'dark' ? 'light' : 'dark';
+  html.dataset.theme = next;
+  document.getElementById('theme-btn').textContent = next === 'dark' ? '🌙' : '☀️';
+}
+
+function fmtDate(d) {
+  if (!d) return '—';
+  return new Date(d).toLocaleDateString('en-GB',
+    { day:'2-digit', month:'short', year:'numeric' });
+}
+
+function ago(d) {
+  const s = Math.floor((Date.now() - d) / 1000);
+  if (s < 5)    return 'just now';
+  if (s < 60)   return `${s}s ago`;
+  if (s < 3600) return `${Math.floor(s/60)}m ago`;
+  if (s < 86400)return `${Math.floor(s/3600)}h ago`;
+  return `${Math.floor(s/86400)}d ago`;
+}
+</script>
+</body>
+</html>
