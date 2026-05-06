@@ -39,30 +39,28 @@
       btn.dataset.tracking = s.on ? 'on' : 'off';
       btn.setAttribute('aria-pressed', String(s.on));
       btn.querySelector('.mt-lbl').textContent = s.on ? 'Tracking ON' : 'Track';
-    });
-
-    sendBtn.addEventListener('mousedown', async () => {
-      const s = state.get(compose);
-      if (!s.on) return;
 
       const body = compose.querySelector('div[aria-label="Message Body"], div.Am.Al.editable');
-      const subject = compose.querySelector('input[name="subjectbox"]')?.value || '(No subject)';
-      const to = compose.querySelector('input[name="to"]')?.value || '';
-
-      if (body) {
+      if (s.on && body) {
         const id = generateUUID();
         const baseUrl = 'https://mailtrack-lmba.onrender.com';
-        const pixelHtml = `<img src="${baseUrl}/track/open/${id}" width="1" height="1" style="display:none" alt=""/>`;
-
-        // Instant injection
-        body.innerHTML += `\n${pixelHtml}`;
-        console.log('MailTrack: Instant tracking pixel injected:', id);
-
-        // Notify server in the background
+        const pixelHtml = `<img src="${baseUrl}/track/open/${id}" id="mt-px-${id}" width="1" height="1" style="display:none" alt=""/>`;
+        
+        // Save ID to remove it later if toggled off
+        s.lastId = id;
+        body.innerHTML += pixelHtml;
+        
+        // Notify server
+        const subject = compose.querySelector('input[name="subjectbox"]')?.value || '(No subject)';
+        const to = compose.querySelector('input[name="to"]')?.value || '';
         chrome.runtime.sendMessage({
           type: 'CREATE_TRACKED_EMAIL',
           data: { id, subject, recipientEmail: to }
         });
+      } else if (!s.on && body && s.lastId) {
+        const px = body.querySelector(`#mt-px-${s.lastId}`);
+        if (px) px.remove();
+        s.lastId = null;
       }
     });
 
