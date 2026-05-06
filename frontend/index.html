@@ -123,11 +123,78 @@
     .modal-overlay.active { display:flex }
     .modal { background:var(--card-bg);width:100%;max-width:600px;border-radius:16px;padding:32px;border:1px solid var(--border);box-shadow:0 20px 50px rgba(0,0,0,0.5) }
     .email-row { cursor:pointer;transition:0.2s }
-    .email-row:hover { background:rgba(255,255,255,0.05) }
+    .landing-page { min-height:100vh;display:flex;flex-direction:column;align-items:center;background:radial-gradient(circle at 50% -20%, var(--surface2) 0%, var(--bg) 80%);position:relative;overflow:hidden }
+    .landing-nav { width:100%;max-width:1200px;padding:24px;display:flex;justify-content:space-between;align-items:center;z-index:10 }
+    .landing-logo { font-size:24px;font-weight:700;display:flex;align-items:center;gap:12px;color:var(--text) }
+    .landing-logo-icon { width:40px;height:40px;background:var(--accent);border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;box-shadow:0 10px 20px rgba(79,142,247,0.3) }
+    .landing-hero { max-width:800px;text-align:center;padding:100px 24px;z-index:10;animation:fadeUp 0.8s ease cubic-bezier(0.16, 1, 0.3, 1) }
+    .landing-badge { display:inline-block;padding:6px 16px;background:rgba(79,142,247,0.1);color:var(--accent);border-radius:30px;font-size:14px;font-weight:600;margin-bottom:24px;border:1px solid rgba(79,142,247,0.2) }
+    .landing-title { font-size:64px;font-weight:800;line-height:1.1;margin-bottom:24px;background:linear-gradient(135deg, #fff 0%, #a5b4fc 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-1.5px }
+    .landing-subtitle { font-size:20px;color:var(--muted);line-height:1.6;margin-bottom:48px;max-width:600px;margin-inline:auto }
+    .landing-buttons { display:flex;gap:16px;justify-content:center;margin-bottom:80px }
+    .btn-hero { padding:14px 32px;font-size:16px;font-weight:600;border-radius:12px;transition:all 0.3s }
+    .btn-hero-primary { background:var(--accent);color:#fff;box-shadow:0 12px 24px rgba(79,142,247,0.3);border:none }
+    .btn-hero-primary:hover { transform:translateY(-2px);box-shadow:0 16px 32px rgba(79,142,247,0.4) }
+    .btn-hero-secondary { background:var(--surface);color:var(--text);border:1px solid var(--border) }
+    .btn-hero-secondary:hover { background:var(--surface2) }
+    .landing-features { display:grid;grid-template-columns:repeat(3, 1fr);gap:24px;max-width:1100px;padding:0 24px 100px;z-index:10;width:100% }
+    .landing-feature { background:var(--surface);border:1px solid var(--border);padding:32px;border-radius:24px;text-align:left;transition:transform 0.3s }
+    .landing-feature:hover { transform:translateY(-5px) }
+    .lf-icon { width:48px;height:48px;background:var(--surface2);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:20px;color:var(--accent) }
+    .lf-title { font-size:18px;font-weight:700;margin-bottom:12px }
+    .lf-desc { font-size:14px;color:var(--muted);line-height:1.6 }
+    .landing-glow { position:absolute;width:600px;height:600px;background:radial-gradient(circle, rgba(79,142,247,0.1) 0%, rgba(0,0,0,0) 70%);top:-100px;left:50%;transform:translateX(-50%);z-index:0;pointer-events:none }
+    @keyframes fadeUp { from { opacity:0;transform:translateY(30px) } to { opacity:1;transform:translateY(0) } }
+    @media(max-width:900px){ .landing-features { grid-template-columns:1fr } .landing-title{font-size:48px} }
 </style>
 </head>
 <body>
 
+<!-- Landing Page -->
+<div id="landing-page" class="landing-page" style="display:none">
+  <div class="landing-glow"></div>
+  <nav class="landing-nav">
+    <div class="landing-logo">
+      <div class="landing-logo-icon">✉</div>
+      MailTrack
+    </div>
+    <div style="display:flex;gap:12px">
+      <button class="btn btn-ghost" onclick="openLogin()">Log in</button>
+      <button class="btn btn-primary" onclick="openRegister()">Sign up</button>
+    </div>
+  </nav>
+  
+  <div class="landing-hero">
+    <div class="landing-badge">✨ Now in Early Access</div>
+    <h1 class="landing-title">Know Exactly When Your Emails Are Opened.</h1>
+    <p class="landing-subtitle">The stealthiest, GDPR-compliant email tracking platform for Gmail. Never wonder if they saw your message again.</p>
+    <div class="landing-buttons">
+      <button class="btn btn-hero btn-hero-primary" onclick="window.location.href='https://mailtrack-lmba.onrender.com/auth/google'">Continue with Google</button>
+      <button class="btn btn-hero btn-hero-secondary" onclick="openLogin()">Sign in with Email</button>
+    </div>
+  </div>
+
+  <div class="landing-features">
+    <div class="landing-feature">
+      <div class="lf-icon">👁</div>
+      <div class="lf-title">Invisible Tracking</div>
+      <div class="lf-desc">Injects a microscopic 1x1 pixel into your emails. Recipients will never know they are being tracked.</div>
+    </div>
+    <div class="landing-feature">
+      <div class="lf-icon">⚡</div>
+      <div class="lf-title">Real-time Alerts</div>
+      <div class="lf-desc">Get instant browser notifications and watch your dashboard light up the second your email is opened.</div>
+    </div>
+    <div class="landing-feature">
+      <div class="lf-icon">🛡</div>
+      <div class="lf-title">Privacy First</div>
+      <div class="lf-desc">Built with GDPR in mind. We anonymize IPs and never read or store the actual content of your emails.</div>
+    </div>
+  </div>
+</div>
+
+<!-- App Container (Sidebar + Main) -->
+<div id="app-container" style="display:none">
 <!-- Sidebar -->
 <aside class="sidebar">
   <div class="logo">
@@ -141,7 +208,8 @@
   </nav>
   <div class="sidebar-footer">
     <div id="conn-status" class="conn-wait">● Connecting…</div>
-    <div style="margin-top:6px" id="sidebar-user"></div>
+    <div style="margin-top:6px;margin-bottom:12px" id="sidebar-user"></div>
+    <button class="btn btn-ghost" style="width:100%;font-size:12px;padding:6px" onclick="logout()">Sign Out</button>
   </div>
 </aside>
 
@@ -317,6 +385,7 @@
   </div>
 
 </main>
+</div> <!-- End App Container -->
 
 <!-- Compose Modal -->
 <div class="overlay" id="compose-modal">
@@ -357,7 +426,7 @@
 </div>
 
 <!-- Login Modal -->
-<div class="overlay open" id="login-modal">
+<div class="overlay" id="login-modal">
   <div class="modal" style="max-width:400px;text-align:center">
     <div style="font-size:40px;margin-bottom:12px">✉️</div>
     <h2 style="margin-bottom:8px">Welcome to MailTrack</h2>
@@ -393,8 +462,16 @@ let settings = {};
 
 // ── Init ──────────────────────────────────────────────────────────────────
 (async function init() {
-  if (!token) return; // show login modal
-  closeModal('login-modal');
+  if (!token) {
+    document.getElementById('landing-page').style.display = 'flex';
+    document.getElementById('app-container').style.display = 'none';
+    return;
+  }
+  
+  // Show dashboard
+  document.getElementById('landing-page').style.display = 'none';
+  document.getElementById('app-container').style.display = 'block';
+  
   const r = await apiFetch('/auth/me');
   if (!r) return;
   document.getElementById('sidebar-user').textContent = r.user.email;
@@ -402,6 +479,18 @@ let settings = {};
   loadSettings();
   connectSSE();
 })();
+
+function openLogin() {
+  document.getElementById('login-modal').classList.add('open');
+}
+function openRegister() {
+  // We can just use the login modal but change the title if needed, or keep it simple.
+  openLogin();
+}
+function logout() {
+  localStorage.removeItem('mt_token');
+  window.location.href = '/';
+}
 
 // ── Navigation ────────────────────────────────────────────────────────────
 document.getElementById('sidebar-nav').addEventListener('click', (e) => {
