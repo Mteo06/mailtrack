@@ -66,7 +66,7 @@ function onEvent(event) {
 
 // Message relay from popup / content script
 chrome.runtime.onMessage.addListener((msg, _, reply) => {
-  if (msg.type === 'SET_AUTH_TOKEN') {
+  if (msg.type === 'SET_AUTH_TOKEN' || msg.type === 'SET_TOKEN') {
     authToken = msg.token;
     chrome.storage.local.set({ authToken: msg.token });
     connectSSE();

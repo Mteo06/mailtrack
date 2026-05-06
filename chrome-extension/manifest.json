@@ -9,12 +9,19 @@
     "service_worker": "src/background/service-worker.js",
     "type": "module"
   },
-  "content_scripts": [{
-    "matches": ["https://mail.google.com/*"],
-    "js": ["src/content/gmail-injector.js"],
-    "css": ["src/content/gmail-styles.css"],
-    "run_at": "document_idle"
-  }],
+  "content_scripts": [
+    {
+      "matches": ["https://mail.google.com/*"],
+      "js": ["src/content/gmail-injector.js"],
+      "css": ["src/content/gmail-styles.css"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://mailtrack-lmba.onrender.com/*"],
+      "js": ["src/content/dashboard-sync.js"],
+      "run_at": "document_idle"
+    }
+  ],
   "action": {
     "default_popup": "src/popup/popup.html",
     "default_title": "MailTrack"
