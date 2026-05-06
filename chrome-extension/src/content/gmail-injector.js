@@ -41,6 +41,28 @@
       btn.querySelector('.mt-lbl').textContent = s.on ? 'Tracking ON' : 'Track';
     });
 
+    sendBtn.addEventListener('mousedown', async () => {
+      const s = state.get(compose);
+      if (!s.on) return;
+
+      const body = compose.querySelector('div[aria-label="Message Body"], div.Am.Al.editable');
+      const subject = compose.querySelector('input[name="subjectbox"]')?.value || '(No subject)';
+      const to = compose.querySelector('input[name="to"]')?.value || '';
+
+      if (body) {
+        // Request tracking pixel from server
+        chrome.runtime.sendMessage({
+          type: 'CREATE_TRACKED_EMAIL',
+          data: { subject, recipientEmail: to }
+        }, (res) => {
+          if (res && res.trackingPixelHtml) {
+            body.innerHTML += `\n${res.trackingPixelHtml}`;
+            console.log('MailTrack: Tracking pixel injected.');
+          }
+        });
+      }
+    });
+
     sendBtn.parentElement?.insertBefore(btn, sendBtn);
   }
 

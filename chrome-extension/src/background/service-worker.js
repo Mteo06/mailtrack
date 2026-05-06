@@ -83,5 +83,19 @@ chrome.runtime.onMessage.addListener((msg, _, reply) => {
       { headers: { Authorization: `Bearer ${authToken}` } })
       .then(r => r.json()).then(reply).catch(() => reply({ tracking_enabled: false }));
     return true; // async
+  } else if (msg.type === 'CREATE_TRACKED_EMAIL') {
+    if (!authToken) { reply(null); return; }
+    fetch(`${API_BASE}/email/create`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authToken}`
+      },
+      body: JSON.stringify(msg.data)
+    })
+    .then(r => r.json())
+    .then(reply)
+    .catch(() => reply(null));
+    return true; // async
   }
 });
