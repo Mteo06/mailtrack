@@ -5,7 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MailTrack Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     :root,[data-theme="dark"]{
       --bg:#0f1117;--surface:#1a1d27;--surface2:#21263a;
@@ -121,7 +123,7 @@
     }
       .modal-overlay { position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);display:none;justify-content:center;align-items:center;z-index:2000;padding:20px }
     .modal-overlay.active { display:flex }
-    .modal { background:var(--card-bg);width:100%;max-width:600px;border-radius:16px;padding:32px;border:1px solid var(--border);box-shadow:0 20px 50px rgba(0,0,0,0.5) }
+    .modal { background:var(--surface);width:100%;max-width:600px;border-radius:16px;padding:32px;border:1px solid var(--border);box-shadow:0 20px 50px rgba(0,0,0,0.5) }
     .email-row { cursor:pointer;transition:0.2s }
     .landing-page { min-height:100vh;display:flex;flex-direction:column;align-items:center;background:radial-gradient(circle at 50% -20%, var(--surface2) 0%, var(--bg) 80%);position:relative;overflow:hidden }
     .landing-nav { width:100%;max-width:1200px;padding:24px;display:flex;justify-content:space-between;align-items:center;z-index:10 }
@@ -144,6 +146,24 @@
     .lf-title { font-size:18px;font-weight:700;margin-bottom:12px }
     .lf-desc { font-size:14px;color:var(--muted);line-height:1.6 }
     .landing-glow { position:absolute;width:600px;height:600px;background:radial-gradient(circle, rgba(79,142,247,0.1) 0%, rgba(0,0,0,0) 70%);top:-100px;left:50%;transform:translateX(-50%);z-index:0;pointer-events:none }
+    
+    /* Marquee */
+    .marquee-container { width:100%;overflow:hidden;background:var(--surface2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:16px 0;margin-bottom:60px;white-space:nowrap;display:flex }
+    .marquee-content { display:flex;animation:marquee 20s linear infinite;gap:40px;padding-right:40px }
+    .marquee-item { font-weight:600;color:var(--text);font-size:14px;display:flex;align-items:center;gap:8px;opacity:0.8 }
+    .marquee-item span { color:var(--accent) }
+    @keyframes marquee { 0% { transform:translateX(0) } 100% { transform:translateX(-100%) } }
+
+    /* Login Page */
+    .login-page { min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg);position:relative;z-index:50 }
+    .login-card { background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:40px;width:100%;max-width:440px;text-align:center;box-shadow:0 20px 40px rgba(0,0,0,0.2) }
+    
+    /* Footer */
+    .landing-footer { width:100%;padding:40px 24px;border-top:1px solid var(--border);background:var(--surface);text-align:center;font-size:12px;color:var(--muted);margin-top:auto;line-height:1.6 }
+    .footer-links { display:flex;justify-content:center;gap:24px;margin-bottom:16px }
+    .footer-links a { color:var(--muted);text-decoration:none;transition:color 0.2s }
+    .footer-links a:hover { color:var(--text) }
+    
     @keyframes fadeUp { from { opacity:0;transform:translateY(30px) } to { opacity:1;transform:translateY(0) } }
     @media(max-width:900px){ .landing-features { grid-template-columns:1fr } .landing-title{font-size:48px} }
 </style>
@@ -174,27 +194,80 @@
     </div>
   </div>
 
-  <div class="landing-features">
-    <div class="landing-feature">
-      <div class="lf-icon">👁</div>
-      <div class="lf-title">Invisible Tracking</div>
-      <div class="lf-desc">Injects a microscopic 1x1 pixel into your emails. Recipients will never know they are being tracked.</div>
+    <div class="landing-features">
+      <div class="landing-feature">
+        <div class="lf-icon">👁</div>
+        <div class="lf-title">Invisible Tracking</div>
+        <div class="lf-desc">Injects a microscopic 1x1 pixel into your emails. Recipients will never know they are being tracked.</div>
+      </div>
+      <div class="landing-feature">
+        <div class="lf-icon">⚡</div>
+        <div class="lf-title">Real-time Alerts</div>
+        <div class="lf-desc">Get instant browser notifications and watch your dashboard light up the second your email is opened.</div>
+      </div>
+      <div class="landing-feature">
+        <div class="lf-icon">🛡</div>
+        <div class="lf-title">Privacy First</div>
+        <div class="lf-desc">Built with GDPR in mind. We anonymize IPs and never read or store the actual content of your emails.</div>
+      </div>
     </div>
-    <div class="landing-feature">
-      <div class="lf-icon">⚡</div>
-      <div class="lf-title">Real-time Alerts</div>
-      <div class="lf-desc">Get instant browser notifications and watch your dashboard light up the second your email is opened.</div>
+    
+    <div class="marquee-container">
+      <div class="marquee-content">
+        <div class="marquee-item"><span>⚡</span> Real-time Tracking</div>
+        <div class="marquee-item"><span>🛡</span> GDPR Compliant</div>
+        <div class="marquee-item"><span>🚀</span> Zero Configuration</div>
+        <div class="marquee-item"><span>👻</span> Invisible Pixel</div>
+        <div class="marquee-item"><span>🧩</span> Chrome Extension</div>
+      </div>
+      <div class="marquee-content" aria-hidden="true">
+        <div class="marquee-item"><span>⚡</span> Real-time Tracking</div>
+        <div class="marquee-item"><span>🛡</span> GDPR Compliant</div>
+        <div class="marquee-item"><span>🚀</span> Zero Configuration</div>
+        <div class="marquee-item"><span>👻</span> Invisible Pixel</div>
+        <div class="marquee-item"><span>🧩</span> Chrome Extension</div>
+      </div>
     </div>
-    <div class="landing-feature">
-      <div class="lf-icon">🛡</div>
-      <div class="lf-title">Privacy First</div>
-      <div class="lf-desc">Built with GDPR in mind. We anonymize IPs and never read or store the actual content of your emails.</div>
+
+    <footer class="landing-footer">
+      <div class="footer-links">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms & Conditions</a>
+      </div>
+      <div style="max-width:800px;margin:0 auto">
+        <strong>Disclaimer:</strong> MailTrack is provided "as is" without warranties of any kind. 
+        Users are solely responsible for ensuring their use of the service complies with applicable local, state, and international laws, including privacy regulations like GDPR. 
+        We do not store email content.
+      </div>
+    </footer>
+  </div>
+
+  <!-- Login Page -->
+  <div id="login-page" class="login-page" style="display:none">
+    <div class="login-card">
+      <div style="font-size:40px;margin-bottom:12px">✉️</div>
+      <h2 style="margin-bottom:8px">Welcome to MailTrack</h2>
+      <p style="color:var(--muted);font-size:13px;margin-bottom:24px;line-height:1.6">
+        Log in to view your dashboard.<br>
+      </p>
+      <div class="field">
+        <input type="email" id="l-email" placeholder="you@example.com">
+      </div>
+      <div class="field">
+        <input type="password" id="l-pass" placeholder="••••••••">
+      </div>
+      <div id="login-err" style="font-size:13px;color:var(--red);margin-bottom:10px;min-height:16px"></div>
+      <button class="btn btn-primary" style="width:100%;margin-bottom:10px;padding:12px" onclick="login()">Sign In</button>
+      <button class="btn btn-ghost" style="width:100%;margin-bottom:16px;padding:12px" onclick="register()">Create Account</button>
+      <a href="https://mailtrack-lmba.onrender.com/auth/google" style="display:block;font-size:13px;color:var(--accent);margin-top:16px">
+        Sign in with Google →
+      </a>
+      <button class="btn btn-ghost" style="margin-top:24px;border:none;font-size:12px" onclick="showLanding()">← Back to Home</button>
     </div>
   </div>
-</div>
 
-<!-- App Container (Sidebar + Main) -->
-<div id="app-container" style="display:none">
+  <!-- App Container (Sidebar + Main) -->
+  <div id="app-container" style="display:none">
 <!-- Sidebar -->
 <aside class="sidebar">
   <div class="logo">
@@ -224,6 +297,7 @@
         <span class="live-dot"></span>
         <span style="font-size:13px;color:var(--muted)">Live</span>
         <button class="icon-btn" onclick="toggleTheme()" id="theme-btn">🌙</button>
+        <button class="btn btn-ghost" onclick="logout()">Sign Out</button>
         <button class="btn btn-primary" onclick="openComposeModal()">+ Send Email</button>
       </div>
     </div>
@@ -387,9 +461,9 @@
 </main>
 </div> <!-- End App Container -->
 
-<!-- Compose Modal -->
-<div class="overlay" id="compose-modal">
-  <div class="modal">
+    <!-- Compose Modal -->
+    <div class="overlay" id="compose-modal" onclick="closeModal('compose-modal')">
+      <div class="modal" onclick="event.stopPropagation()">
     <h2>Send Tracked Email</h2>
     <div class="field">
       <label>To</label>
@@ -423,33 +497,49 @@
       <button class="btn btn-primary" onclick="sendEmail()">Send Email</button>
     </div>
   </div>
-</div>
+    </div>
 
-<!-- Login Modal -->
-<div class="overlay" id="login-modal">
-  <div class="modal" style="max-width:400px;text-align:center">
-    <div style="font-size:40px;margin-bottom:12px">✉️</div>
-    <h2 style="margin-bottom:8px">Welcome to MailTrack</h2>
-    <p style="color:var(--muted);font-size:13px;margin-bottom:24px;line-height:1.6">
-      GDPR-compliant email tracking for Gmail.<br>
-      Tracking is always opt-in. Your email content is never stored.
-    </p>
-    <div class="field">
-      <label>Email</label>
-      <input type="email" id="l-email" placeholder="you@example.com">
+    <!-- Detail Modal -->
+    <div id="modal-overlay" class="modal-overlay" onclick="closeDetails()">
+      <div class="modal" onclick="event.stopPropagation()">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px">
+          <div>
+            <h2 id="det-subject" style="margin-bottom:4px">Email Details</h2>
+            <div id="det-to" style="font-size:14px;opacity:0.7"></div>
+          </div>
+          <button class="btn btn-ghost" onclick="closeDetails()" style="padding:4px 8px">✕</button>
+        </div>
+        
+        <div id="cert-content">
+          <div style="text-align:center;margin-bottom:20px;display:none" id="cert-header">
+            <h1 style="font-size:24px;font-weight:700;color:var(--accent);margin-bottom:8px">MailTrack Certified Report</h1>
+            <p style="color:var(--muted);font-size:12px">Proof of Delivery & Read Receipt</p>
+          </div>
+          
+          <div class="stats-grid" style="margin-bottom:24px;display:grid;grid-template-columns:1fr 1fr;gap:16px">
+            <div class="stat-card" style="background:var(--surface2);padding:16px;border-radius:12px;border:1px solid var(--border)">
+              <div class="stat-value" id="det-opens" style="font-size:24px;font-weight:700">0</div>
+              <div class="stat-label" style="font-size:12px;color:var(--muted)">Total Opens</div>
+            </div>
+            <div class="stat-card" style="background:var(--surface2);padding:16px;border-radius:12px;border:1px solid var(--border)">
+              <div class="stat-value" id="det-clicks" style="font-size:24px;font-weight:700">0</div>
+              <div class="stat-label" style="font-size:12px;color:var(--muted)">Total Clicks</div>
+            </div>
+          </div>
+          
+          <h3 style="margin-bottom:12px;font-size:14px;text-transform:uppercase;letter-spacing:1px;opacity:0.6">History Log</h3>
+          <div id="det-history" style="max-height:300px;overflow-y:auto;background:var(--bg);border-radius:8px;padding:8px">
+            <div style="text-align:center;padding:20px;opacity:0.5">Loading history...</div>
+          </div>
+        </div>
+
+        <div class="modal-footer" style="margin-top:24px;border-top:1px solid var(--border);padding-top:20px">
+          <button class="btn btn-ghost" onclick="generatePDF()">Generate Certificate (PDF)</button>
+        </div>
+      </div>
     </div>
-    <div class="field">
-      <label>Password</label>
-      <input type="password" id="l-pass" placeholder="••••••••">
-    </div>
-    <div id="login-err" style="font-size:13px;color:var(--red);margin-bottom:10px;min-height:16px"></div>
-    <button class="btn btn-primary" style="width:100%;margin-bottom:10px" onclick="login()">Sign In</button>
-    <button class="btn btn-ghost" style="width:100%;margin-bottom:16px" onclick="register()">Create Account</button>
-    <a href="https://mailtrack-lmba.onrender.com/auth/google" style="display:block;font-size:13px;color:var(--accent)">
-      Sign in with Google →
-    </a>
-  </div>
-</div>
+</body>
+</html>
 
 <script>
 const API = 'https://mailtrack-lmba.onrender.com';
@@ -464,12 +554,14 @@ let settings = {};
 (async function init() {
   if (!token) {
     document.getElementById('landing-page').style.display = 'flex';
+    document.getElementById('login-page').style.display = 'none';
     document.getElementById('app-container').style.display = 'none';
     return;
   }
   
   // Show dashboard
   document.getElementById('landing-page').style.display = 'none';
+  document.getElementById('login-page').style.display = 'none';
   document.getElementById('app-container').style.display = 'block';
   
   const r = await apiFetch('/auth/me');
@@ -481,11 +573,15 @@ let settings = {};
 })();
 
 function openLogin() {
-  document.getElementById('login-modal').classList.add('open');
+  document.getElementById('landing-page').style.display = 'none';
+  document.getElementById('login-page').style.display = 'flex';
 }
 function openRegister() {
-  // We can just use the login modal but change the title if needed, or keep it simple.
   openLogin();
+}
+function showLanding() {
+  document.getElementById('login-page').style.display = 'none';
+  document.getElementById('landing-page').style.display = 'flex';
 }
 function logout() {
   localStorage.removeItem('mt_token');
@@ -596,6 +692,49 @@ function emailRow(e) {
       }
     } catch (err) {
       console.error(err);
+    }
+  }
+
+  async function generatePDF() {
+    try {
+      const btn = document.querySelector('.modal-footer .btn-ghost');
+      const originalText = btn.textContent;
+      btn.textContent = 'Generating...';
+      btn.disabled = true;
+
+      // Unhide certificate header
+      document.getElementById('cert-header').style.display = 'block';
+      
+      const content = document.getElementById('cert-content');
+      
+      const canvas = await html2canvas(content, {
+        scale: 2,
+        backgroundColor: document.documentElement.getAttribute('data-theme') === 'light' ? '#fff' : '#0f1117'
+      });
+      
+      // Hide certificate header again
+      document.getElementById('cert-header').style.display = 'none';
+
+      const imgData = canvas.toDataURL('image/png');
+      const { jsPDF } = window.jspdf;
+      
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'px',
+        format: 'a4'
+      });
+
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+      pdf.addImage(imgData, 'PNG', 0, 20, pdfWidth, pdfHeight);
+      pdf.save('MailTrack-Certificate.pdf');
+      
+      btn.textContent = originalText;
+      btn.disabled = false;
+    } catch (e) {
+      console.error('PDF Generation failed', e);
+      alert('Failed to generate PDF. Check console.');
     }
   }
 
@@ -838,31 +977,4 @@ function ago(d) {
   return `${Math.floor(s/86400)}d ago`;
 }
 </script>
-    <!-- Detail Modal -->
-    <div id="modal-overlay" class="modal-overlay" onclick="closeDetails()">
-      <div class="modal" onclick="event.stopPropagation()">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px">
-          <div>
-            <h2 id="det-subject" style="margin-bottom:4px">Email Details</h2>
-            <div id="det-to" style="font-size:14px;opacity:0.7"></div>
-          </div>
-          <button class="btn btn-ghost" onclick="closeDetails()" style="padding:4px 8px">✕</button>
-        </div>
-        <div class="stats-grid" style="margin-bottom:24px">
-          <div class="stat-card">
-            <div class="stat-value" id="det-opens">0</div>
-            <div class="stat-label">Total Opens</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-value" id="det-clicks">0</div>
-            <div class="stat-label">Total Clicks</div>
-          </div>
-        </div>
-        <h3 style="margin-bottom:12px;font-size:14px;text-transform:uppercase;letter-spacing:1px;opacity:0.6">History Log</h3>
-        <div id="det-history" style="max-height:300px;overflow-y:auto">
-          <div style="text-align:center;padding:20px;opacity:0.5">Loading history...</div>
-        </div>
-      </div>
-    </div>
-</body>
-</html>
+
