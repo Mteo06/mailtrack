@@ -24,8 +24,7 @@
     .sidebar{position:fixed;top:0;left:0;width:220px;height:100vh;background:var(--surface);
       border-right:1px solid var(--border);display:flex;flex-direction:column;padding:20px 0;z-index:100}
     .logo{display:flex;align-items:center;gap:8px;padding:0 20px 24px;font-weight:700;font-size:18px}
-    .logo-icon{width:28px;height:28px;background:var(--accent);border-radius:8px;
-      display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px}
+    .logo-icon{width:28px;height:28px;object-fit:contain}
     nav a{display:flex;align-items:center;gap:10px;padding:10px 20px;color:var(--muted);
       text-decoration:none;font-size:14px;font-weight:500;transition:color .15s,background .15s}
     nav a:hover,nav a.active{color:var(--text);background:var(--surface2)}
@@ -128,7 +127,7 @@
     .landing-page { min-height:100vh;display:flex;flex-direction:column;align-items:center;background:radial-gradient(circle at 50% -20%, var(--surface2) 0%, var(--bg) 80%);position:relative;overflow:hidden }
     .landing-nav { width:100%;max-width:1200px;padding:24px;display:flex;justify-content:space-between;align-items:center;z-index:10 }
     .landing-logo { font-size:24px;font-weight:700;display:flex;align-items:center;gap:12px;color:var(--text) }
-    .landing-logo-icon { width:40px;height:40px;background:var(--accent);border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;box-shadow:0 10px 20px rgba(79,142,247,0.3) }
+    .landing-logo-icon { width:40px;height:40px;object-fit:contain;border-radius:12px}
     .landing-hero { max-width:800px;text-align:center;padding:100px 24px;z-index:10;animation:fadeUp 0.8s ease cubic-bezier(0.16, 1, 0.3, 1) }
     .landing-badge { display:inline-block;padding:6px 16px;background:rgba(79,142,247,0.1);color:var(--accent);border-radius:30px;font-size:14px;font-weight:600;margin-bottom:24px;border:1px solid rgba(79,142,247,0.2) }
     .landing-title { font-size:64px;font-weight:800;line-height:1.1;margin-bottom:24px;background:linear-gradient(135deg, #fff 0%, #a5b4fc 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-1.5px }
@@ -166,6 +165,28 @@
     
     @keyframes fadeUp { from { opacity:0;transform:translateY(30px) } to { opacity:1;transform:translateY(0) } }
     @media(max-width:900px){ .landing-features { grid-template-columns:1fr } .landing-title{font-size:48px} }
+    @media (max-width: 768px) {
+      .sidebar { width: 100%; height: auto; position: static; }
+      .main { margin-left: 0; padding: 12px; }
+      .kpis { grid-template-columns: 1fr; }
+      .topbar { flex-direction: column; gap: 12px; align-items: flex-start; }
+      .landing-title { font-size: 36px; }
+      .landing-subtitle { font-size: 16px; }
+      .landing-buttons { flex-direction: column; width: 100%; }
+      .btn-hero { width: 100%; }
+      .modal { width: 95vw; max-width: none; padding: 20px; }
+      .stats-grid { grid-template-columns: 1fr; }
+      .grid2 { grid-template-columns: 1fr; }
+      .kpi { padding: 16px; }
+      .kpi-value { font-size: 28px; }
+      .card-header { padding: 12px 16px; }
+      .table th, .table td { padding: 8px 12px; font-size: 12px; }
+      .feed-item { padding: 8px 16px; font-size: 12px; }
+      .settings-section { padding: 16px; }
+      .field input, .field textarea, .field select { padding: 8px 10px; font-size: 13px; }
+      .modal-footer { flex-direction: column; gap: 8px; }
+      .btn { padding: 10px 16px; font-size: 13px; }
+    }
 </style>
 </head>
 <body>
@@ -175,7 +196,7 @@
   <div class="landing-glow"></div>
   <nav class="landing-nav">
     <div class="landing-logo">
-      <div class="landing-logo-icon">✉</div>
+      <img src="assets/logo.png" alt="MailTrack" class="landing-logo-icon">
       MailTrack
     </div>
     <div style="display:flex;gap:12px">
@@ -271,7 +292,7 @@
 <!-- Sidebar -->
 <aside class="sidebar">
   <div class="logo">
-    <div class="logo-icon">✉</div>
+    <img src="assets/logo.png" alt="MailTrack" class="logo-icon">
     MailTrack
   </div>
   <nav id="sidebar-nav">
@@ -716,7 +737,9 @@ function emailRow(e) {
       
       const canvas = await html2canvas(content, {
         scale: 2,
-        backgroundColor: document.documentElement.getAttribute('data-theme') === 'light' ? '#fff' : '#0f1117'
+        backgroundColor: document.documentElement.getAttribute('data-theme') === 'light' ? '#fff' : '#0f1117',
+        useCORS: true,
+        allowTaint: false
       });
       
       // Restore styles
@@ -725,7 +748,7 @@ function emailRow(e) {
       document.getElementById('cert-header').style.display = 'none';
 
       const imgData = canvas.toDataURL('image/png');
-      const jsPDF = window.jspdf ? window.jspdf.jsPDF : window.jsPDF;
+      const jsPDF = window.jsPDF;
       
       if (!jsPDF) throw new Error('jsPDF library not loaded');
 

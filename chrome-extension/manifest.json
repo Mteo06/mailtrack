@@ -3,6 +3,11 @@
   "name": "MailTrack — Email Tracking for Gmail",
   "version": "1.0.0",
   "description": "GDPR-compliant email tracking. Tracking is off by default — you choose when to enable it.",
+  "icons": {
+    "16": "icons/icon-16.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
   "permissions": ["storage", "notifications", "identity"],
   "host_permissions": ["https://mail.google.com/*"],
   "background": {
