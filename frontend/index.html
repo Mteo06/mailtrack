@@ -723,45 +723,101 @@ function emailRow(e) {
       btn.textContent = 'Generating...';
       btn.disabled = true;
 
-      // Unhide certificate header
-      document.getElementById('cert-header').style.display = 'block';
+      // Get email details
+      const subject = document.getElementById('det-subject').textContent;
+      const recipient = document.getElementById('det-to').textContent;
+      const totalOpens = document.getElementById('det-opens').textContent;
+      const totalClicks = document.getElementById('det-clicks').textContent;
       
-      const content = document.getElementById('cert-content');
-      const history = document.getElementById('det-history');
+      // Get events from history
+      const historyTable = document.querySelector('#det-history table');
+      let firstOpen = 'N/A';
+      let lastOpen = 'N/A';
+      let events = [];
       
-      // Temporarily expand history for full capture
-      const origMaxH = history.style.maxHeight;
-      const origOverflow = history.style.overflowY;
-      history.style.maxHeight = 'none';
-      history.style.overflowY = 'visible';
-      
-      const canvas = await html2canvas(content, {
-        scale: 2,
-        backgroundColor: document.documentElement.getAttribute('data-theme') === 'light' ? '#fff' : '#0f1117',
-        useCORS: true,
-        allowTaint: false
-      });
-      
-      // Restore styles
-      history.style.maxHeight = origMaxH;
-      history.style.overflowY = origOverflow;
-      document.getElementById('cert-header').style.display = 'none';
+      if (historyTable) {
+        const rows = historyTable.querySelectorAll('tbody tr');
+        rows.forEach(row => {
+          const cells = row.querySelectorAll('td');
+          if (cells.length >= 3) {
+            const type = cells[0].textContent.trim();
+            const dateTime = cells[1].querySelector('div:first-child').textContent + ' ' + cells[1].querySelector('div:last-child').textContent;
+            const location = cells[2].querySelector('div:first-child').textContent;
+            events.push({ type, dateTime, location });
+            
+            if (type.includes('Open')) {
+              if (firstOpen === 'N/A') firstOpen = dateTime;
+              lastOpen = dateTime;
+            }
+          }
+        });
+      }
 
-      const imgData = canvas.toDataURL('image/png');
+      // Create PDF
       const jsPDF = window.jsPDF;
+      const pdf = new jsPDF();
       
-      if (!jsPDF) throw new Error('jsPDF library not loaded');
-
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'px',
-        format: 'a4'
-      });
-
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-
-      pdf.addImage(imgData, 'PNG', 0, 20, pdfWidth, pdfHeight);
+      // Title
+      pdf.setFontSize(20);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('MailTrack Certificate of Delivery', 20, 30);
+      
+      // Certificate header
+      pdf.setFontSize(14);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text('Proof of Email Read Receipt & Engagement', 20, 45);
+      
+      // Email details
+      pdf.setFontSize(12);
+      pdf.text(`Subject: ${subject}`, 20, 65);
+      pdf.text(`Recipient: ${recipient}`, 20, 80);
+      
+      // Statistics
+      pdf.setFontSize(14);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('Engagement Summary', 20, 100);
+      
+      pdf.setFontSize(12);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text(`Total Opens: ${totalOpens}`, 20, 115);
+      pdf.text(`Total Clicks: ${totalClicks}`, 20, 130);
+      pdf.text(`First Open: ${firstOpen}`, 20, 145);
+      pdf.text(`Last Open: ${lastOpen}`, 20, 160);
+      
+      // Events table
+      if (events.length > 0) {
+        pdf.setFontSize(14);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('Detailed Event Log', 20, 185);
+        
+        pdf.setFontSize(10);
+        pdf.setFont('helvetica', 'normal');
+        
+        let yPos = 200;
+        events.forEach(event => {
+          if (yPos > 270) {
+            pdf.addPage();
+            yPos = 30;
+          }
+          pdf.text(`${event.type} - ${event.dateTime} - ${event.location}`, 20, yPos);
+          yPos += 10;
+        });
+      }
+      
+      // Approval stamp
+      pdf.setFontSize(16);
+      pdf.setFont('helvetica', 'bold');
+      pdf.setTextColor(79, 142, 247); // Accent color
+      pdf.text('APPROVED BY', 20, pdf.internal.pageSize.height - 60);
+      pdf.setFontSize(20);
+      pdf.text('MailTrack', 20, pdf.internal.pageSize.height - 45);
+      
+      // Timestamp
+      pdf.setFontSize(10);
+      pdf.setTextColor(0, 0, 0);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text(`Generated on: ${new Date().toLocaleString()}`, 20, pdf.internal.pageSize.height - 20);
+      
       pdf.save('MailTrack-Certificate.pdf');
       
       btn.textContent = originalText;
